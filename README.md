@@ -64,7 +64,7 @@ cargo build --release --target x86_64-pc-windows-msvc -p cli
    ```bash
    npm run tauri:dev
    ```
-   Интерфейс покажет бренд `Created by dsold / Разработал dsold`, потоковые таблицы, граф процессов и все вкладки (Flows, Alerts, DNS, Graph, Processes, Settings). Переключение языка происходит моментально без перезагрузки.
+   Интерфейс покажет потоковые таблицы, граф процессов и все вкладки (Flows, Alerts, DNS, Graph, Processes, Settings). Переключение языка происходит моментально без перезагрузки.
 
 ```bash
 cargo run -p cli -- --config config/config.toml tui
