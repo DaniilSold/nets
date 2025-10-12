@@ -1,0 +1,221 @@
+{
+  "header": {
+    "brand": "Разработал dsold",
+    "brandAria": "Открыть сведения о продукте",
+    "brandAbout": "Разработал dsold — автономный мониторинг сети от dsold",
+    "group": {
+      "status": "Состояние захвата",
+      "resources": "Нагрузка демона",
+      "mode": "Режим работы",
+      "locale": "Язык интерфейса",
+      "actions": "Быстрые действия"
+    },
+    "mode": {
+      "observer": "Наблюдатель",
+      "guardian": "Защитник"
+    },
+    "status": {
+      "connected": "Подключено",
+      "disconnected": "Нет связи",
+      "cpu": "CPU",
+      "memory": "RAM",
+      "cpuDetail": "Загрузка CPU {{value}}%",
+      "memoryDetail": "Память {{value}} МБ",
+      "flowsPerSecond": "{{count}} потоков/с",
+      "flowsPerSecondHelp": "Количество потоков в секунду"
+    },
+    "capture": {
+      "on": "Захват ВКЛ",
+      "off": "Захват ВЫКЛ"
+    },
+    "actions": {
+      "switchMode": "Переключить режим",
+      "openSettings": "Открыть настройки",
+      "toggleCapture": "Режим захвата переключён"
+    }
+  },
+  "navigation": {
+    "flows": "Текущие потоки",
+    "alerts": "Алерты",
+    "dns": "DNS и сервисы",
+    "graph": "Граф",
+    "processes": "Процессы",
+    "settings": "Настройки"
+  },
+  "filters": {
+    "title": "Фильтры",
+    "protocol": "Протокол",
+    "direction": "Направление",
+    "risk": "Риск",
+    "process": "Процесс",
+    "port": "Порт",
+    "presets": "Пресеты",
+    "choosePreset": "Выберите пресет…",
+    "processPlaceholder": "Поиск по имени или PID",
+    "noProcess": "Процессы не найдены",
+    "portPlaceholder": "например, 53, 137, 4000-4100",
+    "portHelp": "Порты или диапазоны через запятую",
+    "tooltips": {
+      "lateral": "Соединения внутри одной подсети"
+    },
+    "directions": {
+      "inbound": "Входящие",
+      "outbound": "Исходящие",
+      "lateral": "Латеральные (одна подсеть)"
+    },
+    "clear": "Сбросить фильтры"
+  },
+  "flows": {
+    "title": "Сетевые события",
+    "search": "Поиск потоков",
+    "resetSearch": "Сбросить поиск",
+    "pause": "Пауза",
+    "resume": "Продолжить",
+    "pausedQueue": "{{count}} в очереди при паузе",
+    "selectionCount": "Выбрано {{count}} поток(ов)",
+    "processFilterHint": "Добавить процесс в фильтр",
+    "processUnknown": "Неизвестно",
+    "columns": {
+      "time": "Время",
+      "proto": "Протокол",
+      "src": "Источник (IP:порт)",
+      "dst": "Назначение (IP:порт)",
+      "iface": "Интерфейс",
+      "direction": "Напр.",
+      "process": "Процесс",
+      "packets": "Пакеты",
+      "bytes": "Байты",
+      "risk": "Риск",
+      "actions": "Действия"
+    },
+    "directions": {
+      "inbound": "Входящие",
+      "outbound": "Исходящие",
+      "lateral": "Латеральные"
+    },
+    "risk": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий"
+    },
+    "density": {
+      "comfortable": "Стандартно",
+      "compact": "Компактно"
+    },
+    "empty": "Пока нет данных. Измените фильтры или дождитесь новых событий.",
+    "confirmQuarantine": "Подтвердите в течение 3 секунд, чтобы отправить процесс в карантин.",
+    "actions": {
+      "export": "Экспорт PCAP",
+      "exportSelection": "Экспорт выделенных",
+      "clearSelection": "Очистить выбор",
+      "quarantine": "Карантин",
+      "quarantineConfirm": "Нажмите ещё раз для подтверждения",
+      "inspect": "Просмотр",
+      "selectRow": "Выбрать поток",
+      "filterPort": "Фильтр по порту"
+    }
+  },
+  "alerts": {
+    "title": "Алерты",
+    "empty": "В текущем окне алертов нет.",
+    "details": "Детали",
+    "rationale": "Обоснование",
+    "suggestion": "Рекомендация",
+    "acknowledge": "Подтвердить",
+    "export": "Экспорт отчёта",
+    "modal": {
+      "title": "Детали алерта",
+      "quarantine": "Карантин (подтверждение)",
+      "confirm": "Подтвердить",
+      "cancel": "Отмена"
+    }
+  },
+  "dns": {
+    "title": "DNS, mDNS, SSDP",
+    "records": "Записи",
+    "services": "Сервисы",
+    "empty": "В выбранном окне нет записей сервис-дискавери.",
+    "columns": {
+      "qname": "Запрос",
+      "qtype": "Тип",
+      "rcode": "Ответ",
+      "count": "Количество",
+      "last": "Последний раз"
+    },
+    "servicesColumns": {
+      "name": "Сервис",
+      "address": "Адрес",
+      "port": "Порт",
+      "process": "Процесс",
+      "last": "Последний раз"
+    },
+    "toggles": {
+      "mdns": "mDNS",
+      "llmnr": "LLMNR",
+      "nbns": "NBNS",
+      "ssdp": "SSDP"
+    }
+  },
+  "graph": {
+    "title": "Связи процессов и хостов",
+    "subtitle": "Визуализация коммуникаций процесс ↔ узел",
+    "legend": {
+      "process": "Процесс",
+      "endpoint": "Узел"
+    }
+  },
+  "processes": {
+    "title": "Процессы",
+    "listeningOnly": "Только LISTEN",
+    "columns": {
+      "name": "Процесс",
+      "pid": "PID",
+      "user": "Пользователь",
+      "signed": "Подпись",
+      "hash": "Хэш",
+      "ports": "Порты",
+      "flows": "Потоки",
+      "last": "Активность"
+    },
+    "empty": "Данные о процессах отсутствуют.",
+    "signed": {
+      "yes": "Подписан",
+      "no": "Не подписан"
+    }
+  },
+  "settings": {
+    "title": "Параметры",
+    "description": "Настройка семплирования, приватности и доступности",
+    "sampleRate": "Коэффициент семплирования",
+    "maxHeader": "Максимум байт заголовка",
+    "lanOnly": "Только LAN",
+    "logging": "Сохранять логи потоков",
+    "animations": "Включить анимации",
+    "reducedMotion": "Отключать анимации при системном запросе",
+    "exportPath": "Экспорт сохраняется в",
+    "save": "Сохранить"
+  },
+  "statusBar": {
+    "capturedAt": "Захват в {{time}}",
+    "paused": "Поток на паузе",
+    "sample": "Сэмпл {{ratio}}",
+    "dropRate": "Потери {{value}}%",
+    "queue": "Очередь {{count}}"
+  },
+  "actions": {
+    "refresh": "Обновить",
+    "close": "Закрыть"
+  },
+  "notifications": {
+    "settingsSaved": "Настройки сохранены",
+    "reportReady": "Отчёт экспортирован",
+    "pcapReady": "PCAP готов",
+    "presetApplied": "Пресет применён",
+    "copied": "Скопировано в буфер",
+    "copyFailed": "Не удалось скопировать",
+    "selectionExported": "Экспортировано {{count}} поток(ов)"
+  },
+  "typewriter": {
+    "welcome": ["Разработал dsold", "Автономный режим", "Безопасность в приоритете"]
+  }
+}

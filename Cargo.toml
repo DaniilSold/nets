@@ -5,7 +5,7 @@ members = [
     "app/analyzer",
     "app/policy",
     "app/storage",
-    "app/ui",
+    "app/ui/src-tauri",
     "app/cli",
 ]
 resolver = "2"
@@ -37,6 +37,7 @@ regex = "1"
 serde_yaml = "0.9"
 clap = { version = "4", features = ["derive"] }
 hex = "0.4"
+base64 = "0.21"
 
 [workspace.metadata]
 repository = "https://offline.local/nets"

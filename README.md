@@ -11,7 +11,7 @@ app/
   analyzer/     # Бейзлайн, DSL правила, алерты
   policy/       # Карантин и локальные реакции
   storage/      # Шифрованное SQLite хранилище
-  ui/           # Desktop UI (Tauri/CLI заглушка)
+  ui/           # Desktop UI (Tauri + React offline shell)
   cli/          # Административный CLI
 config/         # Шаблоны конфигураций
 rules/          # Примеры правил DSL
@@ -40,7 +40,32 @@ docs/           # Архитектура, DSL, ADR, тест-план
 ## Запуск программы
 После подготовки окружения можно использовать административный CLI. Все команды выполняются из корня репозитория.
 
+### Windows: сборка и запуск `.exe`
+Соберите CLI для Windows (исполняемый файл `nets.exe`) и запустите любой режим командной строки PowerShell:
+```powershell
+cargo build --release --target x86_64-pc-windows-msvc -p cli
+./target/x86_64-pc-windows-msvc/release/nets.exe --config .\config\config.toml tui
+```
+Исполняемый файл можно копировать на офлайн-хост и запускать напрямую (`nets.exe flows --limit 20`). Для создания установщика MSI используйте `make -C pkg package-msi` на хосте Windows с установленным WiX Toolset.
+
 ### Режим живого просмотра потоков
+
+### Графический интерфейс (Tauri UI)
+1. Перейдите в каталог `app/ui` и установите зависимости (офлайн, если кеш npm уже подготовлен):
+   ```bash
+   cd app/ui
+   npm install --prefer-offline
+   ```
+2. Для запуска только фронтенда с мок-данными:
+   ```bash
+   npm run dev
+   ```
+3. Для запуска полноценного десктопа (Rust + Tauri):
+   ```bash
+   npm run tauri:dev
+   ```
+   Интерфейс покажет бренд `Created by dsold / Разработал dsold`, потоковые таблицы, граф процессов и все вкладки (Flows, Alerts, DNS, Graph, Processes, Settings). Переключение языка происходит моментально без перезагрузки.
+
 ```bash
 cargo run -p cli -- --config config/config.toml tui
 ```

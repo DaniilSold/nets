@@ -6,6 +6,10 @@ license.workspace = true
 authors.workspace = true
 description = "Administrative CLI for Local Monitoring"
 
+[[bin]]
+name = "nets"
+path = "src/main.rs"
+
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true

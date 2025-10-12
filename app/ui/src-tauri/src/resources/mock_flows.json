@@ -1,0 +1,185 @@
+[
+  {
+    "ts_first": "2024-03-01T10:12:00Z",
+    "ts_last": "2024-03-01T10:12:02Z",
+    "proto": "TCP",
+    "src_ip": "192.168.50.12",
+    "src_port": 54821,
+    "dst_ip": "192.168.50.1",
+    "dst_port": 443,
+    "iface": "eth0",
+    "direction": "Outbound",
+    "state": "ESTABLISHED",
+    "bytes": 8456,
+    "packets": 24,
+    "process": {
+      "pid": 2451,
+      "ppid": 1,
+      "name": "browser",
+      "exe_path": "/usr/bin/browser",
+      "sha256_16": "9fbc3a1d4c5e6a7b",
+      "user": "analyst",
+      "signed": true
+    },
+    "risk": {
+      "score": 12,
+      "level": "Low",
+      "rule_id": "baseline-outbound",
+      "rationale": "Matches normal outbound HTTPS pattern"
+    },
+    "sni": "intranet.local",
+    "alpn": "h2",
+    "ja3": "7513f3c2b3c61a76f7baf29f2b67"
+  },
+  {
+    "ts_first": "2024-03-01T10:12:05Z",
+    "ts_last": "2024-03-01T10:12:05Z",
+    "proto": "UDP",
+    "src_ip": "192.168.50.12",
+    "src_port": 5353,
+    "dst_ip": "224.0.0.251",
+    "dst_port": 5353,
+    "iface": "eth0",
+    "direction": "Lateral",
+    "state": "OPEN",
+    "bytes": 512,
+    "packets": 2,
+    "process": {
+      "pid": 991,
+      "ppid": 1,
+      "name": "mdnsd",
+      "exe_path": "/usr/lib/mdnsd",
+      "sha256_16": "ab73c92e1734f1a9",
+      "user": "system",
+      "signed": true
+    },
+    "risk": {
+      "score": 28,
+      "level": "Low",
+      "rule_id": "discovery-mdns",
+      "rationale": "mDNS broadcast within allowed subnet"
+    },
+    "dns_qname": "printer.local",
+    "dns_qtype": "PTR",
+    "dns_rcode": "NOERROR"
+  },
+  {
+    "ts_first": "2024-03-01T10:12:12Z",
+    "ts_last": "2024-03-01T10:12:13Z",
+    "proto": "TCP",
+    "src_ip": "192.168.50.50",
+    "src_port": 3389,
+    "dst_ip": "192.168.50.200",
+    "dst_port": 53124,
+    "iface": "eth1",
+    "direction": "Inbound",
+    "state": "LISTEN",
+    "bytes": 0,
+    "packets": 0,
+    "process": {
+      "pid": 4032,
+      "ppid": 987,
+      "name": "rdp-listener",
+      "exe_path": "C:/Windows/System32/rdp.exe",
+      "sha256_16": "2134ab90de7812ff",
+      "user": "svc_remote",
+      "signed": false
+    },
+    "risk": {
+      "score": 82,
+      "level": "High",
+      "rule_id": "listener-rdp",
+      "rationale": "Unexpected RDP listener discovered"
+    }
+  },
+  {
+    "ts_first": "2024-03-01T10:12:15Z",
+    "ts_last": "2024-03-01T10:12:15Z",
+    "proto": "ARP",
+    "src_ip": "192.168.50.1",
+    "src_port": 0,
+    "dst_ip": "192.168.50.254",
+    "dst_port": 0,
+    "iface": "eth0",
+    "direction": "Lateral",
+    "state": null,
+    "bytes": 64,
+    "packets": 1,
+    "process": null,
+    "layer2": {
+      "kind": "Arp",
+      "operation": "Reply",
+      "mac_src": "00:11:22:33:44:55",
+      "ip_src": "192.168.50.1",
+      "mac_dst": "00:11:22:33:44:aa",
+      "ip_dst": "192.168.50.254"
+    },
+    "risk": {
+      "score": 90,
+      "level": "High",
+      "rule_id": "arp-collision",
+      "rationale": "Duplicate gateway MAC detected"
+    }
+  },
+  {
+    "ts_first": "2024-03-01T10:12:18Z",
+    "ts_last": "2024-03-01T10:12:19Z",
+    "proto": "UDP",
+    "src_ip": "192.168.50.30",
+    "src_port": 4123,
+    "dst_ip": "192.168.50.53",
+    "dst_port": 53,
+    "iface": "eth0",
+    "direction": "Outbound",
+    "state": "OPEN",
+    "bytes": 900,
+    "packets": 6,
+    "process": {
+      "pid": 1300,
+      "ppid": 1,
+      "name": "dns-checker",
+      "exe_path": "/usr/bin/dns-checker",
+      "sha256_16": "bb11cc223344dd55",
+      "user": "ops",
+      "signed": true
+    },
+    "risk": {
+      "score": 58,
+      "level": "Medium",
+      "rule_id": "dns-nxdomain",
+      "rationale": "Burst of NXDOMAIN responses"
+    },
+    "dns_qname": "random-subdomain.example",
+    "dns_qtype": "A",
+    "dns_rcode": "NXDOMAIN"
+  },
+  {
+    "ts_first": "2024-03-01T10:12:21Z",
+    "ts_last": "2024-03-01T10:12:22Z",
+    "proto": "TCP",
+    "src_ip": "192.168.50.45",
+    "src_port": 54892,
+    "dst_ip": "192.168.50.60",
+    "dst_port": 445,
+    "iface": "eth0",
+    "direction": "Lateral",
+    "state": "SYN-SENT",
+    "bytes": 340,
+    "packets": 4,
+    "process": {
+      "pid": 3210,
+      "ppid": 1024,
+      "name": "notesync",
+      "exe_path": "C:/Program Files/NoteSync/notesync.exe",
+      "sha256_16": "ddeeff0011223344",
+      "user": "analyst",
+      "signed": false
+    },
+    "risk": {
+      "score": 76,
+      "level": "High",
+      "rule_id": "lateral-smb",
+      "rationale": "Unusual SMB lateral movement attempt"
+    }
+  }
+]

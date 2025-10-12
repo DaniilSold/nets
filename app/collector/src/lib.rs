@@ -35,6 +35,14 @@ pub struct ProcessIdentity {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FlowRisk {
+    pub score: u8,
+    pub level: String,
+    pub rule_id: Option<String>,
+    pub rationale: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FlowEvent {
     pub ts_first: DateTime<Utc>,
     pub ts_last: DateTime<Utc>,
@@ -50,6 +58,7 @@ pub struct FlowEvent {
     pub packets: u64,
     pub process: Option<ProcessIdentity>,
     pub layer2: Option<Layer2EventMetadata>,
+    pub risk: Option<FlowRisk>,
     pub sni: Option<String>,
     pub alpn: Option<String>,
     pub ja3: Option<String>,
