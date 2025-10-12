@@ -1,0 +1,7 @@
+{
+  "sample_rate": 10,
+  "max_header_bytes": 256,
+  "lan_only": true,
+  "enable_logging": false,
+  "animations_enabled": true
+}
