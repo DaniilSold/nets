@@ -72,6 +72,7 @@ mod tests {
             packets: 10,
             process: None,
             layer2: None,
+            risk: None,
             sni: None,
             alpn: None,
             ja3: None,

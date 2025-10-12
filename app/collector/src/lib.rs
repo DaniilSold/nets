@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -65,6 +65,35 @@ pub struct FlowEvent {
     pub dns_qname: Option<String>,
     pub dns_qtype: Option<String>,
     pub dns_rcode: Option<String>,
+}
+
+impl Default for FlowEvent {
+    fn default() -> Self {
+        let epoch = Utc.timestamp_opt(0, 0).unwrap();
+        Self {
+            ts_first: epoch,
+            ts_last: epoch,
+            proto: String::new(),
+            src_ip: String::new(),
+            src_port: 0,
+            dst_ip: String::new(),
+            dst_port: 0,
+            iface: None,
+            direction: FlowDirection::Inbound,
+            state: None,
+            bytes: 0,
+            packets: 0,
+            process: None,
+            layer2: None,
+            risk: None,
+            sni: None,
+            alpn: None,
+            ja3: None,
+            dns_qname: None,
+            dns_qtype: None,
+            dns_rcode: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

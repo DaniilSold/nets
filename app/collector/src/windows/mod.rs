@@ -60,15 +60,7 @@ pub fn sample_listener_event() -> FlowEvent {
         iface: Some("Ethernet0".into()),
         direction: crate::FlowDirection::Inbound,
         state: Some("LISTEN".into()),
-        bytes: 0,
-        packets: 0,
-        process: None,
-        layer2: None,
-        sni: None,
-        alpn: None,
-        ja3: None,
-        dns_qname: None,
-        dns_qtype: None,
-        dns_rcode: None,
+        risk: None,
+        ..FlowEvent::default()
     }
 }
