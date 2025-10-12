@@ -40,14 +40,6 @@ docs/           # Архитектура, DSL, ADR, тест-план
 ## Запуск программы
 После подготовки окружения можно использовать административный CLI. Все команды выполняются из корня репозитория.
 
-### Windows: сборка и запуск `.exe`
-Соберите CLI для Windows (исполняемый файл `nets.exe`) и запустите любой режим командной строки PowerShell:
-```powershell
-cargo build --release --target x86_64-pc-windows-msvc -p cli
-./target/x86_64-pc-windows-msvc/release/nets.exe --config .\config\config.toml tui
-```
-Исполняемый файл можно копировать на офлайн-хост и запускать напрямую (`nets.exe flows --limit 20`). Для создания установщика MSI используйте `make -C pkg package-msi` на хосте Windows с установленным WiX Toolset.
-
 ### Режим живого просмотра потоков
 ```bash
 cargo run -p cli -- --config config/config.toml tui
