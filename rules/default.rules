@@ -1,0 +1,21 @@
+- id: listener-unexpected
+  severity: High
+  summary: "Неожиданный listener"
+  rationale: "Новый LISTEN порт вне разрешённого списка"
+  suggested_action: "Проверить процесс"
+  expression: "listener(0) and not proc.name in [\"sshd\", \"nginx\"]"
+- id: arp-collision
+  severity: High
+  summary: "ARP коллизия"
+  rationale: "Дублирующийся MAC для IP шлюза"
+  expression: "function arp_collision"
+- id: dns-nx-spike
+  severity: Medium
+  summary: "Всплеск NXDOMAIN"
+  rationale: "Необычное количество NXDOMAIN"
+  expression: "rate(\"dns.nxdomain\", \"5m\", 50)"
+- id: smb-lateral
+  severity: High
+  summary: "SMB латеральная активность"
+  rationale: "Процесс обращается к SMB внутри LAN"
+  expression: "lan(dst.ip) and dst.port in [445,139] and proc.name != \"System\""
