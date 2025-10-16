@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    { "id": "proc-browser", "kind": "Process", "label": "browser (2451)", "risk": null },
+    { "id": "proc-rdp", "kind": "Process", "label": "rdp-listener (4032)", "risk": "high" },
+    { "id": "proc-mdnsd", "kind": "Process", "label": "mdnsd (991)", "risk": "medium" },
+    { "id": "endpoint-gateway", "kind": "Endpoint", "label": "192.168.50.1:443", "risk": null },
+    { "id": "endpoint-rdp", "kind": "Endpoint", "label": "0.0.0.0:3389", "risk": "high" },
+    { "id": "endpoint-mdns", "kind": "Endpoint", "label": "224.0.0.251:5353", "risk": null }
+  ],
+  "links": [
+    { "id": "l1", "source": "proc-browser", "target": "endpoint-gateway", "protocol": "TCP", "volume": 8456, "risk": null },
+    { "id": "l2", "source": "proc-rdp", "target": "endpoint-rdp", "protocol": "TCP", "volume": 0, "risk": "high" },
+    { "id": "l3", "source": "proc-mdnsd", "target": "endpoint-mdns", "protocol": "UDP", "volume": 512, "risk": "medium" }
+  ],
+  "generated_at": "2024-03-01T10:12:33Z"
+}

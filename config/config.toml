@@ -1,0 +1,23 @@
+[collector]
+backend = "auto"          # linux|windows|mock
+sample_rate = 10
+max_header_bytes = 256
+lan_only = true
+
+[storage]
+path = "./nets.db"
+key_source = "system"     # system|file
+max_size_mb = 1024
+retention_days = 14
+
+[analyzer]
+baseline_hours = 48
+rules_path = "./rules/default.rules"
+
+[policy]
+confirmation_required = true
+rollback_timeout_seconds = 600
+
+[ui]
+auto_refresh_seconds = 5
+mask_private_data = true
