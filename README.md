@@ -40,13 +40,13 @@ docs/           # Архитектура, DSL, ADR, тест-план
 ## Запуск программы
 После подготовки окружения можно использовать административный CLI. Все команды выполняются из корня репозитория.
 
-### Windows: сборка и запуск `.exe`
-Соберите CLI для Windows (исполняемый файл `nets.exe`) и запустите любой режим командной строки PowerShell:
+### Windows: сборка и запуск CLI
+Соберите административный CLI для Windows (исполняемый файл `nets-cli.exe`) и запустите любой режим командной строки PowerShell:
 ```powershell
 cargo build --release --target x86_64-pc-windows-msvc -p cli
-./target/x86_64-pc-windows-msvc/release/nets.exe --config .\config\config.toml tui
+./target/x86_64-pc-windows-msvc/release/nets-cli.exe --config .\config\config.toml tui
 ```
-Исполняемый файл можно копировать на офлайн-хост и запускать напрямую (`nets.exe flows --limit 20`). Для создания установщика MSI используйте `make -C pkg package-msi` на хосте Windows с установленным WiX Toolset.
+Исполняемый файл можно копировать на офлайн-хост и запускать напрямую (`nets-cli.exe flows --limit 20`). Для создания установщика MSI используйте `make -C pkg package-msi` на хосте Windows с установленным WiX Toolset.
 
 ### Режим живого просмотра потоков
 
@@ -65,6 +65,12 @@ cargo build --release --target x86_64-pc-windows-msvc -p cli
    npm run tauri:dev
    ```
    Интерфейс покажет бренд `Created by dsold / Разработал dsold`, потоковые таблицы, граф процессов и все вкладки (Flows, Alerts, DNS, Graph, Processes, Settings). Переключение языка происходит моментально без перезагрузки.
+
+4. Для сборки офлайн-инсталлятора и исполняемого файла `nets.exe`, который открывает графический интерфейс без консоли:
+   ```bash
+   npm run tauri:build
+   ```
+   Готовый `nets.exe` появится в `app/ui/src-tauri/target/release/` (и в `bundle/` для пакетов). Его можно запускать двойным кликом — приложение откроется как полноценный интерфейс без консольного окна.
 
 ```bash
 cargo run -p cli -- --config config/config.toml tui

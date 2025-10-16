@@ -7,7 +7,7 @@ authors.workspace = true
 description = "Administrative CLI for Local Monitoring"
 
 [[bin]]
-name = "nets"
+name = "nets-cli"
 path = "src/main.rs"
 
 [dependencies]
