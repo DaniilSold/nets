@@ -1,0 +1,221 @@
+{
+  "header": {
+    "brand": "Created by dsold",
+    "brandAria": "Open about dialog",
+    "brandAbout": "Created by dsold — offline network telemetry by dsold",
+    "group": {
+      "status": "Capture status",
+      "resources": "Resource meters",
+      "mode": "Operating mode",
+      "locale": "Language",
+      "actions": "Quick actions"
+    },
+    "mode": {
+      "observer": "Observer",
+      "guardian": "Guardian"
+    },
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "cpu": "CPU",
+      "memory": "RAM",
+      "cpuDetail": "CPU load {{value}}%",
+      "memoryDetail": "RAM usage {{value}} MB",
+      "flowsPerSecond": "{{count}} flows/s",
+      "flowsPerSecondHelp": "Measured flows per second"
+    },
+    "capture": {
+      "on": "Capture ON",
+      "off": "Capture OFF"
+    },
+    "actions": {
+      "switchMode": "Switch mode",
+      "openSettings": "Open settings",
+      "toggleCapture": "Capture mode toggled"
+    }
+  },
+  "navigation": {
+    "flows": "Live Flows",
+    "alerts": "Alerts",
+    "dns": "DNS & Services",
+    "graph": "Graph",
+    "processes": "Processes",
+    "settings": "Settings"
+  },
+  "filters": {
+    "title": "Filters",
+    "protocol": "Protocol",
+    "direction": "Direction",
+    "risk": "Risk",
+    "process": "Process",
+    "port": "Port",
+    "presets": "Presets",
+    "choosePreset": "Apply preset…",
+    "processPlaceholder": "Search process by name or PID",
+    "noProcess": "No processes match",
+    "portPlaceholder": "e.g. 53, 137, 4000-4100",
+    "portHelp": "Comma separated ports or ranges",
+    "tooltips": {
+      "lateral": "Connections within the same subnet"
+    },
+    "directions": {
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "lateral": "Lateral (same subnet)"
+    },
+    "clear": "Clear filters"
+  },
+  "flows": {
+    "title": "Network activity",
+    "search": "Search flows",
+    "resetSearch": "Reset search",
+    "pause": "Pause feed",
+    "resume": "Resume feed",
+    "pausedQueue": "{{count}} queued while paused",
+    "selectionCount": "{{count}} flow(s) selected",
+    "processFilterHint": "Add process to filters",
+    "processUnknown": "Unknown",
+    "columns": {
+      "time": "Time",
+      "proto": "Protocol",
+      "src": "Src (IP:port)",
+      "dst": "Dst (IP:port)",
+      "iface": "Iface",
+      "direction": "Dir",
+      "process": "Process",
+      "packets": "Packets",
+      "bytes": "Bytes",
+      "risk": "Risk",
+      "actions": "Actions"
+    },
+    "directions": {
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "lateral": "Lateral"
+    },
+    "risk": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "density": {
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "empty": "No flows captured yet. Adjust filters or wait for new activity.",
+    "confirmQuarantine": "Confirm within 3s to quarantine the selected process.",
+    "actions": {
+      "export": "Export PCAP",
+      "exportSelection": "Export selected",
+      "clearSelection": "Clear selection",
+      "quarantine": "Quarantine",
+      "quarantineConfirm": "Click again to confirm quarantine",
+      "inspect": "Inspect",
+      "selectRow": "Select flow",
+      "filterPort": "Filter by port"
+    }
+  },
+  "alerts": {
+    "title": "Alerts",
+    "empty": "No alerts triggered in this window.",
+    "details": "Details",
+    "rationale": "Rationale",
+    "suggestion": "Suggested action",
+    "acknowledge": "Acknowledge",
+    "export": "Export report",
+    "modal": {
+      "title": "Alert details",
+      "quarantine": "Quarantine (confirm x2)",
+      "confirm": "Confirm quarantine",
+      "cancel": "Cancel"
+    }
+  },
+  "dns": {
+    "title": "DNS, mDNS, SSDP",
+    "records": "Records",
+    "services": "Services",
+    "empty": "No discovery records in the current window.",
+    "columns": {
+      "qname": "Query",
+      "qtype": "Type",
+      "rcode": "Response",
+      "count": "Count",
+      "last": "Last seen"
+    },
+    "servicesColumns": {
+      "name": "Service",
+      "address": "Address",
+      "port": "Port",
+      "process": "Process",
+      "last": "Last seen"
+    },
+    "toggles": {
+      "mdns": "mDNS",
+      "llmnr": "LLMNR",
+      "nbns": "NBNS",
+      "ssdp": "SSDP"
+    }
+  },
+  "graph": {
+    "title": "Process to endpoint graph",
+    "subtitle": "Relationships between local processes and hosts",
+    "legend": {
+      "process": "Process",
+      "endpoint": "Endpoint"
+    }
+  },
+  "processes": {
+    "title": "Processes",
+    "listeningOnly": "Listening only",
+    "columns": {
+      "name": "Process",
+      "pid": "PID",
+      "user": "User",
+      "signed": "Signed",
+      "hash": "Hash",
+      "ports": "Ports",
+      "flows": "Flows",
+      "last": "Last active"
+    },
+    "empty": "No process activity recorded.",
+    "signed": {
+      "yes": "Signed",
+      "no": "Unsigned"
+    }
+  },
+  "settings": {
+    "title": "Preferences",
+    "description": "Tune sampling, privacy, and accessibility",
+    "sampleRate": "Sample rate",
+    "maxHeader": "Max header bytes",
+    "lanOnly": "LAN only mode",
+    "logging": "Store flow logs",
+    "animations": "Enable animations",
+    "reducedMotion": "Disable animations when system requests reduced motion",
+    "exportPath": "Exports will be stored in",
+    "save": "Save settings"
+  },
+  "statusBar": {
+    "capturedAt": "Captured at {{time}}",
+    "paused": "Feed paused",
+    "sample": "Sample {{ratio}}",
+    "dropRate": "Drop {{value}}%",
+    "queue": "Queued {{count}}"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "close": "Close"
+  },
+  "notifications": {
+    "settingsSaved": "Settings saved",
+    "reportReady": "Report exported",
+    "pcapReady": "PCAP ready",
+    "presetApplied": "Preset applied",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Copy failed",
+    "selectionExported": "Exported {{count}} flow(s)"
+  },
+  "typewriter": {
+    "welcome": ["Created by dsold", "Offline ready", "Security focused"]
+  }
+}

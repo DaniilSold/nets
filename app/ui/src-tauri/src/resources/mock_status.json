@@ -1,0 +1,11 @@
+{
+  "connected": true,
+  "mode": "Guardian",
+  "cpu_load": 3.2,
+  "memory_mb": 27.5,
+  "last_heartbeat": "2024-03-01T10:12:28Z",
+  "capture_enabled": true,
+  "flows_per_second": 42,
+  "sample_ratio": "1:10",
+  "drop_rate": 0.2
+}

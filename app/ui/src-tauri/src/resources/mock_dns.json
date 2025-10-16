@@ -1,0 +1,47 @@
+[
+  {
+    "id": "dns-1",
+    "qname": "printer.local",
+    "qtype": "PTR",
+    "rcode": "NOERROR",
+    "count": 6,
+    "last_observed": "2024-03-01T10:12:06Z",
+    "channel": "mDNS"
+  },
+  {
+    "id": "dns-2",
+    "qname": "random-subdomain.example",
+    "qtype": "A",
+    "rcode": "NXDOMAIN",
+    "count": 21,
+    "last_observed": "2024-03-01T10:12:25Z",
+    "channel": "DNS"
+  },
+  {
+    "id": "dns-3",
+    "qname": "_workstation._tcp.local",
+    "qtype": "SRV",
+    "rcode": "NOERROR",
+    "count": 4,
+    "last_observed": "2024-03-01T10:12:27Z",
+    "channel": "mDNS"
+  },
+  {
+    "id": "dns-4",
+    "qname": "WORKSTATION",
+    "qtype": "A",
+    "rcode": "NXDOMAIN",
+    "count": 3,
+    "last_observed": "2024-03-01T10:12:29Z",
+    "channel": "LLMNR"
+  },
+  {
+    "id": "dns-5",
+    "qname": "DESKTOP-01",
+    "qtype": "NB",
+    "rcode": "POSITIVE",
+    "count": 5,
+    "last_observed": "2024-03-01T10:12:31Z",
+    "channel": "NBNS"
+  }
+]

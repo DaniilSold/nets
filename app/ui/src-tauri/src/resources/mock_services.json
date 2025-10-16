@@ -1,0 +1,29 @@
+[
+  {
+    "id": "svc-http",
+    "name": "Internal Web",
+    "protocol": "HTTP",
+    "address": "192.168.50.20",
+    "port": 8080,
+    "process": "notesync",
+    "last_seen": "2024-03-01T10:11:50Z"
+  },
+  {
+    "id": "svc-ssdp",
+    "name": "SSDP Broadcast",
+    "protocol": "SSDP",
+    "address": "239.255.255.250",
+    "port": 1900,
+    "process": null,
+    "last_seen": "2024-03-01T10:12:08Z"
+  },
+  {
+    "id": "svc-rdp",
+    "name": "Remote Desktop",
+    "protocol": "RDP",
+    "address": "192.168.50.50",
+    "port": 3389,
+    "process": "rdp-listener",
+    "last_seen": "2024-03-01T10:12:13Z"
+  }
+]
