@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{borrow::Cow, fs, path::PathBuf};
 
 use anyhow::Context;
 use base64::{engine::general_purpose, Engine};
@@ -11,12 +11,29 @@ pub fn resource_path(name: &str) -> PathBuf {
     base.join(name)
 }
 
+fn embedded_resource(name: &str) -> Option<Cow<'static, str>> {
+    match name {
+        "mock_flows.json" => Some(Cow::Borrowed(include_str!("mock_flows.json"))),
+        "mock_alerts.json" => Some(Cow::Borrowed(include_str!("mock_alerts.json"))),
+        "mock_dns.json" => Some(Cow::Borrowed(include_str!("mock_dns.json"))),
+        "mock_services.json" => Some(Cow::Borrowed(include_str!("mock_services.json"))),
+        "mock_processes.json" => Some(Cow::Borrowed(include_str!("mock_processes.json"))),
+        "mock_graph.json" => Some(Cow::Borrowed(include_str!("mock_graph.json"))),
+        "mock_status.json" => Some(Cow::Borrowed(include_str!("mock_status.json"))),
+        "mock_settings.json" => Some(Cow::Borrowed(include_str!("mock_settings.json"))),
+        _ => None,
+    }
+}
+
 pub fn load_json<T: DeserializeOwned>(name: &str) -> anyhow::Result<T> {
     let path = resource_path(name);
-    let data =
-        fs::read_to_string(&path).with_context(|| format!("failed to read resource {path:?}"))?;
-    let value = serde_json::from_str(&data)
-        .with_context(|| format!("failed to parse resource {path:?}"))?;
+    let data = match fs::read_to_string(&path) {
+        Ok(contents) => Cow::Owned(contents),
+        Err(_) => embedded_resource(name)
+            .ok_or_else(|| anyhow::anyhow!("missing embedded resource {name}"))?,
+    };
+    let value =
+        serde_json::from_str(&data).with_context(|| format!("failed to parse resource {name}"))?;
     Ok(value)
 }
 

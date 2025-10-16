@@ -225,7 +225,7 @@ pub fn spawn_status_heartbeat(handle: AppHandle, state: UiState) {
             tokio::select! {
                 Ok(event) = rx.recv() => {
                     if matches!(event, UiEvent::Status(_)) {
-                        if handle.emit_all("ui-event", &event).is_err() {
+                        if handle.emit("ui-event", &event).is_err() {
                             break;
                         }
                     }
@@ -237,7 +237,7 @@ pub fn spawn_status_heartbeat(handle: AppHandle, state: UiState) {
                     };
                     let mut updated = status;
                     updated.last_heartbeat = Utc::now();
-                    if handle.emit_all("ui-event", &UiEvent::Status(updated)).is_err() {
+                    if handle.emit("ui-event", &UiEvent::Status(updated)).is_err() {
                         break;
                     }
                 }
@@ -254,7 +254,7 @@ pub fn emit_mock_flow(handle: &AppHandle, flow: collector::FlowEvent, state: &Ui
     }
     drop(snapshot);
     let _ = state.sender.send(UiEvent::Flow(flow.clone()));
-    let _ = handle.emit_all("ui-event", &UiEvent::Flow(flow));
+    let _ = handle.emit("ui-event", &UiEvent::Flow(flow));
 }
 
 pub fn emit_mock_alert(handle: &AppHandle, alert: analyzer::Alert, state: &UiState) {
@@ -265,7 +265,7 @@ pub fn emit_mock_alert(handle: &AppHandle, alert: analyzer::Alert, state: &UiSta
     }
     drop(snapshot);
     let _ = state.sender.send(UiEvent::Alert(alert.clone()));
-    let _ = handle.emit_all("ui-event", &UiEvent::Alert(alert));
+    let _ = handle.emit("ui-event", &UiEvent::Alert(alert));
 }
 
 pub fn bootstrap_mock_stream(handle: AppHandle, state: UiState) {
