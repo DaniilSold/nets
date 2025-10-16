@@ -1,0 +1,42 @@
+{
+  "$schema": "https://tauri.app/config-schema",
+  "package": {
+    "productName": "nets",
+    "version": "0.1.0"
+  },
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devPath": "http://localhost:5173",
+    "distDir": "../dist"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true
+    },
+    "bundle": {
+      "identifier": "local.nets.monitor",
+      "publisher": "dsold",
+      "copyright": "© 2025 Offline Nets",
+      "targets": ["msi", "nsis", "appimage", "dmg"],
+      "windows": {
+        "wix": {
+          "language": "en-US"
+        }
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "title": "nets",
+        "width": 1440,
+        "height": 900,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true
+      }
+    ]
+  }
+}

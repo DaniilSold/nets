@@ -1,0 +1,43 @@
+[workspace]
+members = [
+    "app/collector",
+    "app/normalizer",
+    "app/analyzer",
+    "app/policy",
+    "app/storage",
+    "app/ui/src-tauri",
+    "app/cli",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+version = "0.1.0"
+authors = ["Local Monitoring Team"]
+description = "Local-only lightweight network flow monitoring toolkit"
+
+[workspace.dependencies]
+anyhow = "1"
+thiserror = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "signal"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+rusqlite = { version = "0.29", features = ["bundled"] }
+ring = "0.17"
+bytes = "1"
+chrono = { version = "0.4", features = ["serde"] }
+prost = "0.12"
+prost-types = "0.12"
+async-trait = "0.1"
+parking_lot = "0.12"
+regex = "1"
+serde_yaml = "0.9"
+clap = { version = "4", features = ["derive"] }
+hex = "0.4"
+base64 = "0.21"
+
+[workspace.metadata]
+repository = "https://offline.local/nets"
