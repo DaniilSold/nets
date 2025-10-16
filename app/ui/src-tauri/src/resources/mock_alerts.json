@@ -1,0 +1,35 @@
+[
+  {
+    "id": "alert-listener-1",
+    "ts": "2024-03-01T10:12:14Z",
+    "severity": "High",
+    "rule_id": "listener.unexpected",
+    "summary": "Unexpected listener on 0.0.0.0:3389",
+    "flow_refs": ["192.168.50.50:3389"],
+    "process_ref": "rdp-listener",
+    "rationale": "Process rdp-listener opened a listener outside approved baseline",
+    "suggested_action": "Confirm host owner and quarantine if unauthorized"
+  },
+  {
+    "id": "alert-arp-dup",
+    "ts": "2024-03-01T10:12:20Z",
+    "severity": "High",
+    "rule_id": "arp.collision",
+    "summary": "ARP collision detected for gateway",
+    "flow_refs": ["192.168.50.1"],
+    "process_ref": null,
+    "rationale": "Multiple MAC addresses announced for gateway 192.168.50.1",
+    "suggested_action": "Pin ARP entry and investigate possible MITM"
+  },
+  {
+    "id": "alert-dns-nx",
+    "ts": "2024-03-01T10:12:30Z",
+    "severity": "Medium",
+    "rule_id": "dns.nxburst",
+    "summary": "Burst of NXDOMAIN responses",
+    "flow_refs": ["192.168.50.12:5353"],
+    "process_ref": "mdnsd",
+    "rationale": "High rate of failed DNS lookups observed in last minute",
+    "suggested_action": "Review queried domains for DGA activity"
+  }
+]
