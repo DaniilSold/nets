@@ -1,4 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { describe, it, expect, vi } from 'vitest';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../setup-i18n';
 import { Header } from '../Header';

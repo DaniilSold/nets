@@ -6,17 +6,38 @@ import processes from '../../src-tauri/src/resources/mock_processes.json';
 import graph from '../../src-tauri/src/resources/mock_graph.json';
 import status from '../../src-tauri/src/resources/mock_status.json';
 import settings from '../../src-tauri/src/resources/mock_settings.json';
-import type { UiSnapshot, UiSettings, UiEvent, PresetSummary } from '../types/ui';
+import type {
+  Alert,
+  DaemonStatus,
+  FlowEvent,
+  GraphSnapshot,
+  PresetSummary,
+  ProcessActivity,
+  ServiceRecord,
+  UiEvent,
+  UiSettings,
+  UiSnapshot,
+  DnsRecord
+} from '../types/ui';
+
+const typedFlows = flows as unknown as FlowEvent[];
+const typedAlerts = alerts as unknown as Alert[];
+const typedDns = dns as unknown as DnsRecord[];
+const typedServices = services as unknown as ServiceRecord[];
+const typedProcesses = processes as unknown as ProcessActivity[];
+const typedGraph = graph as unknown as GraphSnapshot;
+const typedStatus = status as unknown as DaemonStatus;
+const typedSettings = settings as unknown as UiSettings;
 
 export const mockSnapshot: UiSnapshot = {
-  flows,
-  alerts,
-  dns,
-  services,
-  processes,
-  graph,
-  status,
-  settings
+  flows: typedFlows,
+  alerts: typedAlerts,
+  dns: typedDns,
+  services: typedServices,
+  processes: typedProcesses,
+  graph: typedGraph,
+  status: typedStatus,
+  settings: typedSettings
 };
 
 export const mockPresets: PresetSummary[] = [
@@ -46,7 +67,7 @@ export const mockPresets: PresetSummary[] = [
   }
 ];
 
-export const mockEvents: UiEvent[] = flows.slice(0, 3).map((flow, index) => ({
+export const mockEvents: UiEvent[] = typedFlows.slice(0, 3).map((flow, index) => ({
   type: 'Flow',
   payload: {
     ...flow,
@@ -54,4 +75,4 @@ export const mockEvents: UiEvent[] = flows.slice(0, 3).map((flow, index) => ({
   }
 }));
 
-export const mockSettings: UiSettings = settings;
+export const mockSettings: UiSettings = typedSettings;

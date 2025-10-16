@@ -21,10 +21,7 @@ export default defineConfig({
   },
   preview: {
     port: 1420,
-    strictPort: true,
-    fs: {
-      allow: ['..']
-    },
+    strictPort: true
   },
   resolve: {
     alias: {

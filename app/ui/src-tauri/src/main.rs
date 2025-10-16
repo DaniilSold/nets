@@ -19,7 +19,7 @@ use tracing::info;
 fn main() {
     tracing_subscriber::fmt().with_target(false).init();
 
-    tauri::Builder::default()
+    tauri::Builder::new()
         .invoke_handler(tauri::generate_handler![
             load_snapshot,
             update_settings,

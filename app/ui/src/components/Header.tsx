@@ -3,10 +3,10 @@ import type { DaemonStatus } from '../types/ui';
 
 interface HeaderProps {
   status: DaemonStatus;
-  locale: string;
+  locale: 'en' | 'ru';
   brandLine: string;
   animatedLine: string;
-  onChangeLocale: (locale: string) => void;
+  onChangeLocale: (locale: 'en' | 'ru') => void | Promise<void>;
   onToggleMode: () => void;
   onToggleCapture: () => void;
   onOpenSettings: () => void;
@@ -60,7 +60,7 @@ export function Header({
             {status.capture_enabled ? t('header.capture.on') : t('header.capture.off')}
           </button>
           <span className="muted" title={t('header.status.flowsPerSecondHelp')}>
-            {t('header.status.flowsPerSecond', { count: status.flows_per_second.toFixed(0) })}
+            {t('header.status.flowsPerSecond', { count: Math.round(status.flows_per_second) })}
           </span>
         </section>
         <section className="header-group" aria-label={t('header.group.resources')}>
