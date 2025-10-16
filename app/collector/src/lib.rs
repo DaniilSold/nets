@@ -5,6 +5,11 @@ use chrono::{DateTime, TimeZone, Utc};
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use tokio::{
+    sync::{watch, Mutex as AsyncMutex},
+    task::JoinHandle,
+    time::{sleep, Duration},
+};
 use tracing::info;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -122,15 +127,15 @@ pub trait CollectorBackend: Send + Sync {
 
 pub type FlowHandler = Arc<dyn Fn(FlowEvent) + Send + Sync + 'static>;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct SharedHandlers {
-    inner: Mutex<Vec<FlowHandler>>,
+    inner: Arc<Mutex<Vec<FlowHandler>>>,
 }
 
 impl SharedHandlers {
     pub fn new() -> Self {
         Self {
-            inner: Mutex::new(Vec::new()),
+            inner: Arc::new(Mutex::new(Vec::new())),
         }
     }
 
@@ -139,7 +144,8 @@ impl SharedHandlers {
     }
 
     pub fn emit(&self, event: FlowEvent) {
-        for handler in self.inner.lock().iter() {
+        let handlers = self.inner.lock().clone();
+        for handler in handlers {
             handler(event.clone());
         }
     }
@@ -176,20 +182,75 @@ pub fn default_backend() -> Result<Arc<dyn CollectorBackend>> {
 }
 
 /// Simple in-process mock collector used for tests and CLI demonstrations.
-#[derive(Default)]
 pub struct MockCollector {
     handlers: SharedHandlers,
+    shutdown_tx: watch::Sender<bool>,
+    worker: AsyncMutex<Option<JoinHandle<()>>>,
+}
+
+impl Default for MockCollector {
+    fn default() -> Self {
+        let (shutdown_tx, _rx) = watch::channel(false);
+        Self {
+            handlers: SharedHandlers::new(),
+            shutdown_tx,
+            worker: AsyncMutex::new(None),
+        }
+    }
 }
 
 #[async_trait::async_trait]
 impl CollectorBackend for MockCollector {
     async fn start(&self) -> Result<()> {
         info!("mock collector started");
+        let mut guard = self.worker.lock().await;
+        if guard.is_some() {
+            return Ok(());
+        }
+
+        let mut shutdown_rx = self.shutdown_tx.subscribe();
+        let handlers = self.handlers.clone();
+        *guard = Some(tokio::spawn(async move {
+            let mut counter: u64 = 0;
+            loop {
+                tokio::select! {
+                    changed = shutdown_rx.changed() => {
+                        if changed.is_ok() && *shutdown_rx.borrow() {
+                            break;
+                        }
+                    }
+                    _ = sleep(Duration::from_secs(1)) => {
+                        counter += 1;
+                        let now = Utc::now();
+                        let port = 10_000 + (counter % 1_000) as u16;
+                        let event = FlowEvent {
+                            ts_first: now,
+                            ts_last: now,
+                            proto: if counter % 2 == 0 { "TCP".into() } else { "UDP".into() },
+                            src_ip: "127.0.0.1".into(),
+                            src_port: port,
+                            dst_ip: "127.0.0.1".into(),
+                            dst_port: port + 1,
+                            direction: FlowDirection::Lateral,
+                            bytes: counter * 512,
+                            packets: counter * 4,
+                            ..FlowEvent::default()
+                        };
+                        handlers.emit(event);
+                    }
+                }
+            }
+        }));
+
         Ok(())
     }
 
     async fn stop(&self) -> Result<()> {
         info!("mock collector stopped");
+        let _ = self.shutdown_tx.send(true);
+        if let Some(handle) = self.worker.lock().await.take() {
+            let _ = handle.await;
+        }
         Ok(())
     }
 

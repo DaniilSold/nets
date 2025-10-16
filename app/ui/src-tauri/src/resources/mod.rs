@@ -5,14 +5,16 @@ use base64::{engine::general_purpose, Engine};
 use serde::de::DeserializeOwned;
 
 pub fn resource_path(name: &str) -> PathBuf {
-    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src").join("resources");
+    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("resources");
     base.join(name)
 }
 
 pub fn load_json<T: DeserializeOwned>(name: &str) -> anyhow::Result<T> {
     let path = resource_path(name);
-    let data = fs::read_to_string(&path)
-        .with_context(|| format!("failed to read resource {path:?}"))?;
+    let data =
+        fs::read_to_string(&path).with_context(|| format!("failed to read resource {path:?}"))?;
     let value = serde_json::from_str(&data)
         .with_context(|| format!("failed to parse resource {path:?}"))?;
     Ok(value)

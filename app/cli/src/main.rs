@@ -6,7 +6,7 @@ use chrono::Duration;
 use clap::{Parser, Subcommand};
 use collector::{self, CollectorBackend, FlowEvent};
 use storage::Storage;
-use tracing::info;
+use tracing::{info, warn};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Local Monitoring CLI")]
@@ -48,7 +48,14 @@ fn run_tui() -> Result<()> {
     info!("starting CLI TUI mode");
     let rt = tokio::runtime::Runtime::new()?;
     rt.block_on(async move {
-        let backend = collector::MockCollector::default();
+        let backend: Arc<dyn CollectorBackend> = match collector::default_backend() {
+            Ok(backend) => backend,
+            Err(err) => {
+                warn!(error = ?err, "collector backend unavailable, using mock event generator");
+                Arc::new(collector::MockCollector::default())
+            }
+        };
+
         backend.subscribe(Arc::new(|flow: FlowEvent| {
             println!(
                 "{:?} {}:{} -> {}:{} bytes={}",
@@ -56,6 +63,8 @@ fn run_tui() -> Result<()> {
             );
         }));
         backend.start().await?;
+        info!(message = "collector running. press Ctrl+C to stop");
+        tokio::signal::ctrl_c().await?;
         backend.stop().await?;
         Ok(())
     })

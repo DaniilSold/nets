@@ -175,7 +175,10 @@ pub async fn export_report(state: State<'_, UiState>) -> Result<String, String> 
 }
 
 #[tauri::command]
-pub async fn export_pcap(state: State<'_, UiState>, flow_id: Option<String>) -> Result<String, String> {
+pub async fn export_pcap(
+    state: State<'_, UiState>,
+    flow_id: Option<String>,
+) -> Result<String, String> {
     let exports_dir = state.exports_dir();
     let filename = flow_id
         .map(|id| format!("flow-{id}.pcap"))
@@ -184,7 +187,6 @@ pub async fn export_pcap(state: State<'_, UiState>, flow_id: Option<String>) -> 
     resources::write_sample_pcap(&destination).map_err(|e| e.to_string())?;
     Ok(destination.display().to_string())
 }
-
 
 #[tauri::command]
 pub async fn toggle_mode_command(state: State<'_, UiState>) -> Result<(), String> {

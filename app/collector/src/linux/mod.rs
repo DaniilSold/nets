@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use tokio::sync::broadcast;
 use tracing::{debug, info};
 
-use crate::{CollectorBackend, CollectorError, FlowHandler, SharedHandlers};
+use crate::{CollectorBackend, FlowHandler, SharedHandlers};
 
 /// LinuxCollector wires up the eBPF/XDP programs and relays metadata events through
 /// an async broadcast channel. The actual eBPF bytecode is expected to be generated
@@ -42,9 +42,7 @@ impl CollectorBackend for LinuxCollector {
     }
 
     async fn stop(&self) -> Result<()> {
-        self._shutdown_tx
-            .send(())
-            .map_err(|e| CollectorError::Initialization(e.to_string()))?;
+        let _ = self._shutdown_tx.send(());
         Ok(())
     }
 
