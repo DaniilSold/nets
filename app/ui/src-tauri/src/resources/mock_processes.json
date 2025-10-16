@@ -1,0 +1,32 @@
+[
+  {
+    "pid": 2451,
+    "name": "browser",
+    "user": "analyst",
+    "signed": true,
+    "hash": "9fbc3a1d4c5e6a7b",
+    "listening_ports": [],
+    "total_flows": 34,
+    "last_active": "2024-03-01T10:12:32Z"
+  },
+  {
+    "pid": 4032,
+    "name": "rdp-listener",
+    "user": "SYSTEM",
+    "signed": true,
+    "hash": "2134ab90de7812ff",
+    "listening_ports": [3389],
+    "total_flows": 3,
+    "last_active": "2024-03-01T10:12:18Z"
+  },
+  {
+    "pid": 991,
+    "name": "mdnsd",
+    "user": "system",
+    "signed": true,
+    "hash": "ab73c92e1734f1a9",
+    "listening_ports": [5353],
+    "total_flows": 8,
+    "last_active": "2024-03-01T10:12:27Z"
+  }
+]

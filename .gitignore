@@ -1,0 +1,8 @@
+/target
+**/target/
+**/node_modules/
+app/ui/dist/
+app/ui/.vite/
+app/ui/src-tauri/target/
+app/ui/src-tauri/.tauri-build
+.DS_Store
