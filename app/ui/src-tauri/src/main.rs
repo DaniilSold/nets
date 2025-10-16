@@ -39,14 +39,16 @@ fn main() {
             if let Some(locale) = locale_from_disk {
                 *state.locale.blocking_write() = locale;
             }
-            let state_handle = app.manage(state);
+            let state_clone = state.clone();
+            app.manage(state.clone());
 
             // Kick-off event stream
             let handle = app.handle();
-            bootstrap_mock_stream(handle.clone(), state_handle.state::<UiState>());
+            bootstrap_mock_stream(handle.clone(), state_clone.clone());
+            commands::spawn_status_heartbeat(handle.clone(), state_clone.clone());
 
             // Periodic daemon status simulation
-            let status_state = state_handle.state::<UiState>().clone();
+            let status_state = state_clone.clone();
             spawn(async move {
                 let mut ticker = interval(Duration::from_secs(30));
                 loop {

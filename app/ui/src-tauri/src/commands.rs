@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs::File, io::Write, time::Duration};
 
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use tauri::{async_runtime::spawn, AppHandle, Manager, State, Window};
+use tauri::{async_runtime::spawn, AppHandle, Emitter, State, WebviewWindow};
 use tokio::sync::RwLockWriteGuard;
 use tokio::time::interval;
 
@@ -190,20 +190,24 @@ pub async fn export_pcap(
 
 #[tauri::command]
 pub async fn toggle_mode_command(state: State<'_, UiState>) -> Result<(), String> {
-    toggle_mode(&state);
+    toggle_mode(&*state);
     Ok(())
 }
 
 #[tauri::command]
 pub async fn toggle_capture_command(state: State<'_, UiState>) -> Result<(), String> {
-    toggle_capture(&state);
+    toggle_capture(&*state);
     Ok(())
 }
 
 #[tauri::command]
-pub async fn start_event_stream(window: Window, state: State<'_, UiState>) -> Result<(), String> {
-    let mut rx = state.subscribe();
+pub async fn start_event_stream(
+    window: WebviewWindow,
+    state: State<'_, UiState>,
+) -> Result<(), String> {
+    let state = state.inner().clone();
     spawn(async move {
+        let mut rx = state.subscribe();
         while let Ok(event) = rx.recv().await {
             if window.emit("ui-event", &event).is_err() {
                 break;
@@ -213,9 +217,9 @@ pub async fn start_event_stream(window: Window, state: State<'_, UiState>) -> Re
     Ok(())
 }
 
-pub fn spawn_status_heartbeat(handle: AppHandle, state: State<'_, UiState>) {
-    let mut rx = state.subscribe();
+pub fn spawn_status_heartbeat(handle: AppHandle, state: UiState) {
     spawn(async move {
+        let mut rx = state.subscribe();
         let mut ticker = interval(Duration::from_secs(10));
         loop {
             tokio::select! {
@@ -264,7 +268,7 @@ pub fn emit_mock_alert(handle: &AppHandle, alert: analyzer::Alert, state: &UiSta
     let _ = handle.emit_all("ui-event", &UiEvent::Alert(alert));
 }
 
-pub fn bootstrap_mock_stream(handle: AppHandle, state: State<'_, UiState>) {
+pub fn bootstrap_mock_stream(handle: AppHandle, state: UiState) {
     spawn(async move {
         let flows: Vec<collector::FlowEvent> =
             resources::load_json("mock_flows.json").expect("flows fixture");

@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, sync::Arc};
 
 use analyzer::Alert;
 use chrono::{DateTime, Utc};
@@ -122,9 +122,10 @@ pub enum UiEvent {
     Status(DaemonStatus),
 }
 
+#[derive(Clone)]
 pub struct UiState {
-    pub snapshot: RwLock<UiSnapshot>,
-    pub locale: RwLock<String>,
+    pub snapshot: Arc<RwLock<UiSnapshot>>,
+    pub locale: Arc<RwLock<String>>,
     pub sender: broadcast::Sender<UiEvent>,
     pub config_path: PathBuf,
     pub exports_dir: PathBuf,
@@ -145,8 +146,8 @@ impl UiState {
         fs::create_dir_all(&exports_dir)?;
 
         Ok(Self {
-            snapshot: RwLock::new(snapshot),
-            locale: RwLock::new(locale),
+            snapshot: Arc::new(RwLock::new(snapshot)),
+            locale: Arc::new(RwLock::new(locale)),
             sender,
             config_path,
             exports_dir,
