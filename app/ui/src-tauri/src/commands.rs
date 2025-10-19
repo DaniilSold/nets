@@ -351,3 +351,63 @@ pub fn toggle_capture(state: &UiState) {
     drop(snapshot);
     let _ = state.sender.send(UiEvent::Status(status));
 }
+
+#[tauri::command]
+pub async fn terminate_process(pid: i32) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        collector::windows::ActionHandler::terminate_process(pid)
+            .map_err(|e| format!("Failed to terminate process: {}", e))
+    }
+    #[cfg(not(windows))]
+    {
+        Err("Process termination only supported on Windows".to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn block_connection(
+    src_ip: String,
+    src_port: u16,
+    dst_ip: String,
+    dst_port: u16,
+    protocol: String,
+) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        collector::windows::ActionHandler::block_connection(
+            &src_ip, src_port, &dst_ip, dst_port, &protocol,
+        )
+        .map_err(|e| format!("Failed to block connection: {}", e))
+    }
+    #[cfg(not(windows))]
+    {
+        Err("Connection blocking only supported on Windows".to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn quarantine_process(pid: i32) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        collector::windows::ActionHandler::quarantine_process(pid)
+            .map_err(|e| format!("Failed to quarantine process: {}", e))
+    }
+    #[cfg(not(windows))]
+    {
+        Err("Process quarantine only supported on Windows".to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn list_blocked_connections() -> Result<Vec<String>, String> {
+    #[cfg(windows)]
+    {
+        collector::windows::ActionHandler::list_blocked_connections()
+            .map_err(|e| format!("Failed to list blocked connections: {}", e))
+    }
+    #[cfg(not(windows))]
+    {
+        Ok(Vec::new())
+    }
+}
