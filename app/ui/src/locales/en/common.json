@@ -217,5 +217,82 @@
   },
   "typewriter": {
     "welcome": ["Created by dsold", "Offline ready", "Security focused"]
+  },
+  "flowDetails": {
+    "title": "Flow Details",
+    "confirmTerminate": "Are you sure you want to terminate this process?",
+    "confirmBlock": "Are you sure you want to block this connection?",
+    "sections": {
+      "network": "Network Information",
+      "process": "Process Information",
+      "tls": "TLS Metadata",
+      "dns": "DNS Information",
+      "layer2": "Layer 2",
+      "risk": "Risk Assessment",
+      "timestamps": "Timestamps"
+    },
+    "protocol": "Protocol",
+    "source": "Source",
+    "destination": "Destination",
+    "interface": "Interface",
+    "direction": "Direction",
+    "state": "State",
+    "bytes": "Bytes",
+    "packets": "Packets",
+    "processName": "Process Name",
+    "pid": "PID",
+    "ppid": "Parent PID",
+    "exePath": "Executable Path",
+    "user": "User",
+    "sha256": "SHA-256 (first 16 chars)",
+    "signed": "Digital Signature",
+    "signedYes": "Signed",
+    "signedNo": "Unsigned",
+    "sni": "SNI (Server Name Indication)",
+    "alpn": "ALPN (Application Protocol)",
+    "ja3": "JA3 Fingerprint",
+    "dnsQname": "DNS Query (QNAME)",
+    "dnsQtype": "Query Type",
+    "dnsRcode": "Response Code",
+    "l2Kind": "L2 Event Type",
+    "l2Operation": "Operation",
+    "l2MacSrc": "Source MAC",
+    "l2MacDst": "Destination MAC",
+    "riskScore": "Risk Score",
+    "ruleId": "Rule ID",
+    "rationale": "Rationale",
+    "firstSeen": "First Seen",
+    "lastSeen": "Last Seen",
+    "actions": {
+      "blockConnection": "Block Connection",
+      "terminateProcess": "Terminate Process"
+    }
+  },
+  "localProtocols": {
+    "title": "Local Protocols",
+    "description": "Detected local service protocol activity",
+    "empty": "No local protocols detected",
+    "occurrences": "Occurrences",
+    "processes": "Processes",
+    "lastSeen": "Last Seen",
+    "descriptions": {
+      "mdns": "Multicast DNS for local network service discovery",
+      "llmnr": "Windows local name resolution without DNS",
+      "nbns": "NetBIOS Name Service (legacy Windows protocol)",
+      "nbdgm": "NetBIOS Datagram Service",
+      "nbssn": "NetBIOS Session Service",
+      "smb": "Windows file sharing protocol",
+      "ssdp": "UPnP device discovery in local network",
+      "dhcp": "Automatic IP address configuration",
+      "rdp": "Windows Remote Desktop",
+      "kerberos": "Active Directory authentication protocol",
+      "ldap": "Directory services access",
+      "ldaps": "LDAP over secure connection",
+      "dns": "Domain Name System",
+      "unknown": "Unknown protocol"
+    }
+  },
+  "common": {
+    "close": "Close"
   }
 }

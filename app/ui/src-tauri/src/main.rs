@@ -7,8 +7,9 @@ mod state;
 use std::time::Duration;
 
 use commands::{
-    apply_preset, bootstrap_mock_stream, bootstrap_snapshot, export_pcap, export_report,
-    list_presets, load_snapshot, set_locale, start_event_stream, toggle_capture_command,
+    apply_preset, block_connection, bootstrap_mock_stream, bootstrap_snapshot, export_pcap,
+    export_report, list_blocked_connections, list_presets, load_snapshot, quarantine_process,
+    set_locale, start_event_stream, terminate_process, toggle_capture_command,
     toggle_mode_command, update_settings,
 };
 use state::UiState;
@@ -31,6 +32,10 @@ fn main() {
             start_event_stream,
             toggle_mode_command,
             toggle_capture_command,
+            terminate_process,
+            block_connection,
+            quarantine_process,
+            list_blocked_connections,
         ])
         .setup(|app| {
             let snapshot = bootstrap_snapshot()?;
