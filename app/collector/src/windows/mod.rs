@@ -1,7 +1,12 @@
 use std::{
+    ffi::OsString,
+    io::Read,
     net::{IpAddr, Ipv4Addr},
+    path::PathBuf,
     process::Command,
 };
+#[cfg(windows)]
+use std::os::windows::prelude::OsStringExt;
 
 use anyhow::{Context, Result};
 use chrono::Utc;
@@ -11,6 +16,18 @@ use tokio::{
     time::{sleep, Duration},
 };
 use tracing::{debug, info, warn};
+#[cfg(windows)]
+use windows::Win32::{
+    Foundation::HANDLE,
+    Security::{GetTokenInformation, TokenUser, TOKEN_QUERY},
+    System::{
+        Diagnostics::ToolHelp::{CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS},
+        ProcessStatus::K32GetModuleFileNameExW,
+        Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION},
+    },
+};
+#[cfg(windows)]
+use sha2::{Digest, Sha256};
 
 use crate::{
     CollectorBackend, FlowDirection, FlowEvent, FlowHandler, ProcessIdentity, SharedHandlers,
@@ -56,8 +73,15 @@ impl WindowsCollector {
 
         let stdout = String::from_utf8_lossy(&output.stdout);
         let mut events = Vec::new();
+        let mut pid_map: std::collections::HashMap<i32, ProcessIdentity> =
+            Self::snapshot_processes();
         for line in stdout.lines() {
-            if let Some(event) = Self::parse_netstat_line(line) {
+            if let Some(mut event) = Self::parse_netstat_line(line) {
+                if let Some(proc) = &event.process {
+                    if let Some(meta) = pid_map.get(&proc.pid) {
+                        event.process = Some(meta.clone());
+                    }
+                }
                 events.push(event);
             }
         }
@@ -157,6 +181,79 @@ impl WindowsCollector {
         let local_octets = local.octets();
         let remote_octets = remote.octets();
         local_octets[0..3] == remote_octets[0..3]
+    }
+
+    #[cfg(windows)]
+    fn snapshot_processes() -> std::collections::HashMap<i32, ProcessIdentity> {
+        unsafe {
+            let mut map = std::collections::HashMap::new();
+            let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0).ok();
+            if snapshot.is_err() {
+                return map;
+            }
+            let snapshot = snapshot.unwrap();
+            let mut entry: PROCESSENTRY32W = std::mem::zeroed();
+            entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+            if Process32FirstW(snapshot, &mut entry).as_bool() {
+                loop {
+                    let pid = entry.th32ProcessID as i32;
+                    let name = wchar_to_string(&entry.szExeFile);
+                    let (exe_path, sha256_16) = get_process_path_and_hash(pid);
+                    let identity = ProcessIdentity {
+                        pid,
+                        ppid: Some(entry.th32ParentProcessID as i32),
+                        name: Some(name),
+                        exe_path,
+                        sha256_16,
+                        user: None,
+                        signed: None,
+                    };
+                    map.insert(pid, identity);
+                    if !Process32NextW(snapshot, &mut entry).as_bool() {
+                        break;
+                    }
+                }
+            }
+            map
+        }
+    }
+
+    #[cfg(not(windows))]
+    fn snapshot_processes() -> std::collections::HashMap<i32, ProcessIdentity> {
+        std::collections::HashMap::new()
+    }
+}
+
+#[cfg(windows)]
+fn wchar_to_string(buf: &[u16]) -> String {
+    let len = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
+    String::from_utf16_lossy(&buf[..len])
+}
+
+#[cfg(windows)]
+fn get_process_path_and_hash(pid: i32) -> (Option<String>, Option<String>) {
+    unsafe {
+        let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid as u32);
+        if handle.is_err() {
+            return (None, None);
+        }
+        let handle = handle.unwrap();
+        let mut buf = vec![0u16; 260];
+        let len = K32GetModuleFileNameExW(handle, HANDLE(0), &mut buf);
+        if len == 0 {
+            return (None, None);
+        }
+        let path = OsString::from_wide(&buf[..len as usize]).to_string_lossy().to_string();
+        let mut file = match std::fs::File::open(&path) {
+            Ok(f) => f,
+            Err(_) => return (Some(path), None),
+        };
+        let mut hasher = Sha256::new();
+        let mut reader = std::io::BufReader::new(&mut file);
+        let _ = std::io::copy(&mut reader, &mut hasher);
+        let hash = hasher.finalize();
+        let short = hex::encode(hash)[..16].to_string();
+        (Some(path), Some(short))
     }
 }
 

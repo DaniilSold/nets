@@ -9,7 +9,7 @@ use std::time::Duration;
 use commands::{
     apply_preset, bootstrap_mock_stream, bootstrap_snapshot, export_pcap, export_report,
     list_presets, load_snapshot, set_locale, start_event_stream, toggle_capture_command,
-    toggle_mode_command, update_settings,
+    toggle_mode_command, update_settings, quarantine_flow,
 };
 use state::UiState;
 use tauri::{async_runtime::spawn, Manager};
@@ -31,6 +31,7 @@ fn main() {
             start_event_stream,
             toggle_mode_command,
             toggle_capture_command,
+            quarantine_flow,
         ])
         .setup(|app| {
             let snapshot = bootstrap_snapshot()?;
@@ -46,6 +47,8 @@ fn main() {
             let handle = app.handle();
             bootstrap_mock_stream(handle.clone(), state_clone.clone());
             commands::spawn_status_heartbeat(handle.clone(), state_clone.clone());
+            // Analyzer pipeline (rules applied to live flows)
+            commands::spawn_analyzer_pipeline(state_clone.clone());
 
             // Periodic daemon status simulation
             let status_state = state_clone.clone();

@@ -10,6 +10,8 @@ use crate::{
     resources,
     state::{DaemonStatus, Mode, UiEvent, UiSettings, UiSnapshot, UiState},
 };
+use std::sync::Arc;
+use chrono::Duration as ChronoDuration;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PresetSummary {
@@ -195,6 +197,19 @@ pub async fn toggle_mode_command(state: State<'_, UiState>) -> Result<(), String
 }
 
 #[tauri::command]
+pub async fn quarantine_flow(
+    _state: State<'_, UiState>,
+    pid: Option<i32>,
+    exe_path: Option<String>,
+    ports: Vec<u16>,
+    duration_seconds: u64,
+) -> Result<(), String> {
+    // Placeholder: integrate with policy backend and WFP on Windows in future iterations.
+    tracing::info!(?pid, ?exe_path, ?ports, duration_seconds, "quarantine request received");
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn toggle_capture_command(state: State<'_, UiState>) -> Result<(), String> {
     toggle_capture(&*state);
     Ok(())
@@ -206,6 +221,28 @@ pub async fn start_event_stream(
     state: State<'_, UiState>,
 ) -> Result<(), String> {
     let state = state.inner().clone();
+    // Start real collector backend once per app lifetime; fallback to mock if unavailable.
+    {
+        let mut guard = state.collector.lock();
+        if guard.is_none() {
+            let backend: Arc<dyn collector::CollectorBackend> = match collector::default_backend() {
+                Ok(backend) => backend,
+                Err(_err) => Arc::new(collector::MockCollector::default()),
+            };
+            let ui_sender = state.sender.clone();
+            backend.subscribe(Arc::new(move |flow: collector::FlowEvent| {
+                let _ = ui_sender.send(UiEvent::Flow(flow));
+            }));
+            // Fire-and-forget start
+            tauri::async_runtime::spawn({
+                let backend = backend.clone();
+                async move {
+                    let _ = backend.start().await;
+                }
+            });
+            *guard = Some(backend);
+        }
+    }
     spawn(async move {
         let mut rx = state.subscribe();
         while let Ok(event) = rx.recv().await {
@@ -285,6 +322,29 @@ pub fn bootstrap_mock_stream(handle: AppHandle, state: UiState) {
             if Utc::now().timestamp() % 3 == 0 {
                 if let Some(alert) = alert_iter.next() {
                     emit_mock_alert(&handle, alert, &state);
+                }
+            }
+        }
+    });
+}
+
+pub fn spawn_analyzer_pipeline(state: UiState) {
+    spawn(async move {
+        // Load DSL rules bundled at compile time
+        let rules_yaml: &str = include_str!("../../../../rules/default.rules");
+        let mut analyzer = analyzer::Analyzer::new(
+            ChronoDuration::hours(1),
+            analyzer::dsl::load_rules_from_str(rules_yaml).unwrap_or_default(),
+        );
+        let normalizer = normalizer::Normalizer::new(ChronoDuration::seconds(60));
+
+        let mut rx = state.subscribe();
+        while let Ok(event) = rx.recv().await {
+            if let UiEvent::Flow(flow) = event {
+                if let Ok(norm) = normalizer.normalize(flow.clone()) {
+                    for alert in analyzer.ingest(norm) {
+                        let _ = state.sender.send(UiEvent::Alert(alert));
+                    }
                 }
             }
         }
