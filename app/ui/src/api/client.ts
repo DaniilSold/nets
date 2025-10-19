@@ -84,6 +84,14 @@ export async function exportPcap(flowId?: string): Promise<string> {
   return URL.createObjectURL(blob);
 }
 
+export async function applyQuarantine(pid?: number, ports: number[] = []): Promise<void> {
+  if (isTauri) {
+    await invoke('apply_quarantine_command', { pid, ports });
+    return;
+  }
+  // Mock: no-op
+}
+
 export async function startEventStream(handler: EventHandler): Promise<UnlistenFn | null> {
   if (isTauri) {
     await invoke('start_event_stream');

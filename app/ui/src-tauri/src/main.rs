@@ -7,7 +7,7 @@ mod state;
 use std::time::Duration;
 
 use commands::{
-    apply_preset, bootstrap_mock_stream, bootstrap_snapshot, export_pcap, export_report,
+    apply_preset, bootstrap_collector_stream, bootstrap_mock_stream, bootstrap_snapshot, export_pcap, export_report,
     list_presets, load_snapshot, set_locale, start_event_stream, toggle_capture_command,
     toggle_mode_command, update_settings,
 };
@@ -31,6 +31,7 @@ fn main() {
             start_event_stream,
             toggle_mode_command,
             toggle_capture_command,
+            commands::apply_quarantine_command,
         ])
         .setup(|app| {
             let snapshot = bootstrap_snapshot()?;
@@ -42,9 +43,9 @@ fn main() {
             let state_clone = state.clone();
             app.manage(state.clone());
 
-            // Kick-off event stream
+            // Kick-off event stream (real collector if available, fallback to mock)
             let handle = app.handle();
-            bootstrap_mock_stream(handle.clone(), state_clone.clone());
+            bootstrap_collector_stream(handle.clone(), state_clone.clone());
             commands::spawn_status_heartbeat(handle.clone(), state_clone.clone());
 
             // Periodic daemon status simulation

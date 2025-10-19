@@ -1,5 +1,6 @@
 import { FixedSizeList as List, areEqual } from 'react-window';
 import { memo, useMemo, useState } from 'react';
+import { applyQuarantine } from '../api/client';
 import { useTranslation } from 'react-i18next';
 import type { FlowEvent } from '../types/ui';
 
@@ -50,8 +51,13 @@ const FlowRow = memo(({ index, style, data }: { index: number; style: React.CSSP
   const riskScore = flow.risk?.score ?? null;
   const riskLevel = flow.risk?.level ?? null;
 
-  const handleQuarantine = () => {
+  const handleQuarantine = async () => {
     data.onQuarantine(flow);
+    try {
+      await applyQuarantine(flow.process?.pid, [flow.dst_port]);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
