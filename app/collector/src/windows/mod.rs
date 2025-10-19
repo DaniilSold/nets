@@ -1,5 +1,8 @@
 use std::{
+    ffi::OsString,
     net::{IpAddr, Ipv4Addr},
+    os::windows::ffi::OsStringExt,
+    path::PathBuf,
     process::Command,
 };
 
@@ -15,6 +18,24 @@ use tracing::{debug, info, warn};
 use crate::{
     CollectorBackend, FlowDirection, FlowEvent, FlowHandler, ProcessIdentity, SharedHandlers,
 };
+
+#[cfg(windows)]
+use windows::Win32::{
+    Foundation::{CloseHandle, HANDLE},
+    NetworkManagement::IpHelper::{MIB_TCPROW_OWNER_PID, MIB_UDPROW_OWNER_PID},
+    Security::{GetTokenInformation, TokenUser},
+    Security::Authorization::ConvertSidToStringSidW,
+    System::{
+        Diagnostics::ToolHelp::{CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS},
+        Memory::LocalFree,
+        ProcessStatus::K32GetProcessImageFileNameW,
+        Threading::{OpenProcess, OpenProcessToken, PROCESS_QUERY_LIMITED_INFORMATION},
+    },
+};
+#[cfg(windows)]
+use windows::core::PCWSTR;
+use ring::digest::{Context as Sha256Context, SHA256};
+use std::io::Read;
 
 pub struct WindowsCollector {
     handlers: SharedHandlers,
@@ -95,6 +116,7 @@ impl WindowsCollector {
         let direction = Self::infer_direction(&local_ip, &remote_ip);
 
         let now = Utc::now();
+        let process = if pid > 0 { Self::process_identity(pid).ok() } else { None };
         Some(FlowEvent {
             ts_first: now,
             ts_last: now,
@@ -105,19 +127,7 @@ impl WindowsCollector {
             dst_port: remote_port,
             direction,
             state,
-            process: if pid > 0 {
-                Some(ProcessIdentity {
-                    pid,
-                    ppid: None,
-                    name: None,
-                    exe_path: None,
-                    sha256_16: None,
-                    user: None,
-                    signed: None,
-                })
-            } else {
-                None
-            },
+            process,
             ..FlowEvent::default()
         })
     }
@@ -158,6 +168,137 @@ impl WindowsCollector {
         let remote_octets = remote.octets();
         local_octets[0..3] == remote_octets[0..3]
     }
+
+    fn process_identity(pid: i32) -> anyhow::Result<Option<ProcessIdentity>> {
+        #[cfg(not(windows))]
+        {
+            let _ = pid; // silence unused warning
+            return Ok(None);
+        }
+
+        #[cfg(windows)]
+        unsafe {
+            let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid as u32);
+            if handle.is_invalid() {
+                return Ok(Some(ProcessIdentity {
+                    pid,
+                    ppid: None,
+                    name: None,
+                    exe_path: None,
+                    sha256_16: None,
+                    user: None,
+                    signed: None,
+                }));
+            }
+
+            let exe_path = query_image_path(handle)?;
+            let name = exe_path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .map(|s| s.to_string());
+            let sha256_16 = compute_sha256_16(&exe_path).ok();
+            let user = query_process_sid(handle).ok();
+
+            let identity = ProcessIdentity {
+                pid,
+                ppid: query_parent_pid(pid).ok(),
+                name,
+                exe_path: Some(exe_path.display().to_string()),
+                sha256_16,
+                user,
+                signed: None,
+            };
+            let _ = CloseHandle(handle);
+            Ok(Some(identity))
+        }
+    }
+}
+
+#[cfg(windows)]
+unsafe fn query_image_path(handle: HANDLE) -> anyhow::Result<PathBuf> {
+    // Try K32GetProcessImageFileNameW first
+    let mut buffer: [u16; 32768] = [0; 32768];
+    let len = K32GetProcessImageFileNameW(handle, &mut buffer) as usize;
+    if len > 0 {
+        let os = OsString::from_wide(&buffer[..len]);
+        return Ok(PathBuf::from(os));
+    }
+    // Fallback: QueryFullProcessImageNameW via GetModuleFileName? For brevity omitted.
+    Err(anyhow::anyhow!("failed to query process image filename"))
+}
+
+#[cfg(windows)]
+unsafe fn query_process_sid(handle: HANDLE) -> anyhow::Result<String> {
+    let mut token: HANDLE = HANDLE::default();
+    if !OpenProcessToken(handle, windows::Win32::Security::TOKEN_QUERY, &mut token).as_bool() {
+        return Err(anyhow::anyhow!("OpenProcessToken failed"));
+    }
+
+    // First call to get required size
+    let mut needed: u32 = 0;
+    GetTokenInformation(token, TokenUser, None, 0, &mut needed);
+    let mut buffer = vec![0u8; needed as usize];
+    if !GetTokenInformation(
+        token,
+        TokenUser,
+        Some(buffer.as_mut_ptr() as *mut _),
+        needed,
+        &mut needed,
+    )
+    .as_bool()
+    {
+        let _ = CloseHandle(token);
+        return Err(anyhow::anyhow!("GetTokenInformation(TokenUser) failed"));
+    }
+    let token_user: *const windows::Win32::Security::TOKEN_USER = buffer.as_ptr() as *const _;
+    let sid = (*token_user).User.Sid;
+    let mut sid_string_ptr: windows::Win32::Foundation::PWSTR = windows::Win32::Foundation::PWSTR::null();
+    if !ConvertSidToStringSidW(sid, &mut sid_string_ptr).as_bool() {
+        let _ = CloseHandle(token);
+        return Err(anyhow::anyhow!("ConvertSidToStringSidW failed"));
+    }
+    let sid_os = OsString::from_wide({
+        let mut len = 0usize;
+        while *sid_string_ptr.0.add(len) != 0 {
+            len += 1;
+        }
+        std::slice::from_raw_parts(sid_string_ptr.0, len)
+    });
+    let sid_str = sid_os.to_string_lossy().to_string();
+    LocalFree(Some(sid_string_ptr.0 as isize));
+    let _ = CloseHandle(token);
+    Ok(sid_str)
+}
+
+#[cfg(windows)]
+unsafe fn query_parent_pid(pid: i32) -> anyhow::Result<i32> {
+    let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)?;
+    let mut entry = PROCESSENTRY32W { dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32, ..Default::default() };
+    if Process32FirstW(snapshot, &mut entry).as_bool() {
+        loop {
+            if entry.th32ProcessID == pid as u32 {
+                let ppid = entry.th32ParentProcessID as i32;
+                let _ = CloseHandle(snapshot);
+                return Ok(ppid);
+            }
+            if !Process32NextW(snapshot, &mut entry).as_bool() { break; }
+        }
+    }
+    let _ = CloseHandle(snapshot);
+    Err(anyhow::anyhow!("parent pid not found"))
+}
+
+fn compute_sha256_16(path: &PathBuf) -> anyhow::Result<String> {
+    let mut file = std::fs::File::open(path)?;
+    let mut ctx = Sha256Context::new(&SHA256);
+    let mut buf = [0u8; 64 * 1024];
+    loop {
+        let n = file.read(&mut buf)?;
+        if n == 0 { break; }
+        ctx.update(&buf[..n]);
+    }
+    let digest = ctx.finish();
+    Ok(hex::encode(&digest.as_ref()[..8]))
 }
 
 #[async_trait::async_trait]

@@ -1,4 +1,5 @@
 use std::{collections::HashMap, fs::File, io::Write, time::Duration};
+use std::sync::Arc;
 
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -10,6 +11,9 @@ use crate::{
     resources,
     state::{DaemonStatus, Mode, UiEvent, UiSettings, UiSnapshot, UiState},
 };
+use storage::Storage;
+use rand::RngCore;
+use policy::{NoopBackend, QuarantineDecision, PolicyBackend};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PresetSummary {
@@ -212,6 +216,20 @@ pub async fn start_event_stream(
             if window.emit("ui-event", &event).is_err() {
                 break;
             }
+            // Opportunistically persist recent flows and alerts to local storage for history.
+            match &event {
+                UiEvent::Flow(flow) => {
+                    if let Err(err) = persist_flow(flow) {
+                        tracing::warn!(error = %err, "failed to persist flow");
+                    }
+                }
+                UiEvent::Alert(alert) => {
+                    if let Err(err) = persist_alert(alert) {
+                        tracing::warn!(error = %err, "failed to persist alert");
+                    }
+                }
+                UiEvent::Status(_) => {}
+            }
         }
     });
     Ok(())
@@ -291,6 +309,57 @@ pub fn bootstrap_mock_stream(handle: AppHandle, state: UiState) {
     });
 }
 
+pub fn bootstrap_collector_stream(handle: AppHandle, state: UiState) {
+    spawn(async move {
+        let backend = match collector::default_backend() {
+            Ok(b) => b,
+            Err(err) => {
+                tracing::warn!(error = ?err, "collector backend unavailable; falling back to mock stream");
+                bootstrap_mock_stream(handle.clone(), state.clone());
+                return;
+            }
+        };
+
+        let handle_clone = handle.clone();
+        let state_clone = state.clone();
+        backend.subscribe(Arc::new(move |flow: collector::FlowEvent| {
+            // Emit flow into UI
+            emit_mock_flow(&handle_clone, flow.clone(), &state_clone);
+            // Simple built-in detection for unexpected listeners
+            if let Some(alert) = analyzer::detect_listener(&flow) {
+                emit_mock_alert(&handle_clone, alert, &state_clone);
+            }
+        }));
+
+        if let Err(err) = backend.start().await {
+            tracing::warn!(error = ?err, "failed to start collector backend; using mock stream");
+            bootstrap_mock_stream(handle.clone(), state.clone());
+            return;
+        }
+
+        // Keep a weak heartbeat to reflect running backend; we don't stop it here to let app lifetime manage it.
+        let mut ticker = interval(Duration::from_secs(60));
+        loop {
+            ticker.tick().await;
+            // no-op, just keep task alive
+        }
+    });
+}
+
+#[tauri::command]
+pub async fn apply_quarantine_command(_state: State<'_, UiState>, pid: Option<i32>, ports: Vec<u16>) -> Result<(), String> {
+    let decision = QuarantineDecision {
+        process: pid.map(|p| format!("pid:{p}")),
+        ports,
+        expires_in_seconds: 600,
+    };
+    if let Err(err) = policy::validate_decision(&decision) {
+        return Err(err.to_string());
+    }
+    let backend = NoopBackend::default();
+    backend.apply(&decision).map_err(|e| e.to_string())
+}
+
 pub fn bootstrap_snapshot() -> anyhow::Result<UiSnapshot> {
     let flows = resources::load_json("mock_flows.json")?;
     let alerts = resources::load_json("mock_alerts.json")?;
@@ -310,6 +379,47 @@ pub fn bootstrap_snapshot() -> anyhow::Result<UiSnapshot> {
         status,
         settings,
     })
+}
+
+fn storage_path() -> std::path::PathBuf {
+    let base = dirs::data_dir().unwrap_or_else(|| std::path::PathBuf::from("./"));
+    base.join("NetMonDB").join("events.db")
+}
+
+fn load_or_init_storage() -> anyhow::Result<Storage> {
+    let path = storage_path();
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let key = get_or_create_key(path.parent().unwrap());
+    Storage::open(path, &key)
+}
+
+fn persist_flow(flow: &collector::FlowEvent) -> anyhow::Result<()> {
+    let store = load_or_init_storage()?;
+    let _ = store.put_flow(flow)?;
+    Ok(())
+}
+
+fn persist_alert(alert: &analyzer::Alert) -> anyhow::Result<()> {
+    let store = load_or_init_storage()?;
+    store.put_alert(alert)?;
+    Ok(())
+}
+
+fn get_or_create_key(dir: &std::path::Path) -> [u8; 32] {
+    let key_path = dir.join("key.bin");
+    if let Ok(bytes) = std::fs::read(&key_path) {
+        if bytes.len() == 32 {
+            let mut key = [0u8; 32];
+            key.copy_from_slice(&bytes);
+            return key;
+        }
+    }
+    let mut key = [0u8; 32];
+    rand::thread_rng().fill_bytes(&mut key);
+    let _ = std::fs::write(&key_path, &key);
+    key
 }
 
 pub fn load_locale_from_disk(state: &UiState) -> anyhow::Result<Option<String>> {

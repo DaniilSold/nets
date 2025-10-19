@@ -23,6 +23,9 @@ dirs = "5.0"
 base64.workspace = true
 chrono.workspace = true
 futures.workspace = true
+storage = { path = "../../storage" }
+rand = { version = "0.8", features = ["std"] }
+policy = { path = "../../policy" }
 
 tauri = { version = "2.4.1", features = ["wry"] }
 
