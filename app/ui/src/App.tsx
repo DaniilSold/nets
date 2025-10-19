@@ -10,7 +10,8 @@ import {
   startEventStream,
   toggleMode,
   toggleCapture,
-  updateSettings
+  updateSettings,
+  quarantineFlow
 } from './api/client';
 import { useTypewriter } from './hooks/useTypewriter';
 import { useHotkeys } from './hooks/useHotkeys';
@@ -424,7 +425,10 @@ export default function App() {
             onSelectionChange={handleSelectionChange}
             onExport={handleExportFlow}
             onInspect={(flow) => console.info(flow)}
-            onQuarantine={(flow) => console.info('quarantine', flow)}
+            onQuarantine={async (flow) => {
+              await quarantineFlow(flow);
+              pushNotification(t('flows.quarantineRequested'));
+            }}
             onQuickFilter={handleQuickFilter}
             onCopy={handleCopy}
             animationsEnabled={animationsEnabled && !prefersReducedMotion}

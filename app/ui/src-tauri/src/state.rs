@@ -5,6 +5,7 @@ use chrono::{DateTime, Utc};
 use collector::FlowEvent;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, RwLock};
+use parking_lot::Mutex;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -129,6 +130,8 @@ pub struct UiState {
     pub sender: broadcast::Sender<UiEvent>,
     pub config_path: PathBuf,
     pub exports_dir: PathBuf,
+    // Holds a handle to the running collector backend, if started.
+    pub collector: Arc<Mutex<Option<Arc<dyn collector::CollectorBackend>>>>,
 }
 
 impl UiState {
@@ -151,6 +154,7 @@ impl UiState {
             sender,
             config_path,
             exports_dir,
+            collector: Arc::new(Mutex::new(None)),
         })
     }
 

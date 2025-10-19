@@ -113,7 +113,8 @@
       "inspect": "Inspect",
       "selectRow": "Select flow",
       "filterPort": "Filter by port"
-    }
+    },
+    "quarantineRequested": "Quarantine request sent"
   },
   "alerts": {
     "title": "Alerts",

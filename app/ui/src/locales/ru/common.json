@@ -113,7 +113,8 @@
       "inspect": "Просмотр",
       "selectRow": "Выбрать поток",
       "filterPort": "Фильтр по порту"
-    }
+    },
+    "quarantineRequested": "Запрос карантина отправлен"
   },
   "alerts": {
     "title": "Алерты",

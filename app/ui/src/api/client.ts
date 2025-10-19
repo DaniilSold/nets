@@ -4,7 +4,8 @@ import type {
   UiSnapshot,
   UiSettings,
   UiEvent,
-  PresetSummary
+  PresetSummary,
+  FlowEvent
 } from '../types/ui';
 import { mockSnapshot, mockSettings, mockPresets, mockEvents } from '../mocks/snapshot';
 
@@ -94,4 +95,13 @@ export async function startEventStream(handler: EventHandler): Promise<UnlistenF
     window.setTimeout(() => handler(event), (index + 1) * 2000)
   );
   return () => timers.forEach((timer) => window.clearTimeout(timer));
+}
+
+export async function quarantineFlow(flow: FlowEvent, durationSeconds = 600): Promise<void> {
+  if (isTauri) {
+    const pid = flow.process?.pid ?? null;
+    const exePath = flow.process?.exe_path ?? null;
+    const ports = [flow.src_port, flow.dst_port];
+    await invoke('quarantine_flow', { pid, exePath, ports, durationSeconds });
+  }
 }
